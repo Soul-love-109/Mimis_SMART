@@ -82,7 +82,6 @@ body{font-family:'Nunito',sans-serif;background:#F0F8FF;color:#1A3A5C;min-height
 .fb-good{background:#EAFAF1;border:1.5px solid #A9DFBF;color:#1E8449;}
 .fb-ok{background:#EBF5FB;border:1.5px solid #AED6F1;color:#2874A6;}
 .fb-bad{background:#FDEDEC;border:1.5px solid #F1948A;color:#922B21;}
-.fb-load{background:#EBF5FB;border:1.5px solid #AED6F1;color:#2E86C1;}
 .crit-card{background:white;border-radius:14px;padding:13px;border:1.5px solid #D6EAF8;margin-top:12px;}
 .crit-lbl{font-size:11px;font-weight:700;color:#5DADE2;letter-spacing:.5px;margin-bottom:9px;}
 .cr{display:flex;align-items:center;gap:7px;font-size:13px;color:#2C3E50;padding:5px 0;border-bottom:1px solid #EBF5FB;}
@@ -133,7 +132,7 @@ details[open] summary{border-radius:12px 12px 0 0;}
 <div class="app">
 <div id="s-welcome" class="screen active">
 <div class="top-bar">
-<div class="logo"><span class="logo-seal"></span><div><span class="logo-name">Мимис</span><span class="logo-tag">обучение</span></div></div>
+<div class="logo"><span class="logo-seal">🦭</span><div><span class="logo-name">Мимис</span><span class="logo-tag">обучение</span></div></div>
 </div>
 <div class="hero">
 <div class="hero-emo">✨</div>
@@ -147,24 +146,24 @@ details[open] summary{border-radius:12px 12px 0 0;}
 </div>
 <div class="chars">
 <div class="char char-boy"><div class="char-emo">👨‍⚖️</div><div class="char-role">ЮРИСТ</div><div class="char-name">Иван</div></div>
-<div class="char char-girl"><div class="char-emo">👩‍💼</div><div class="char-role">РОП</div><div class="char-name">Снежана</div></div>
-<div class="char char-boy2"><div class="char-emo">👨‍🏭</div><div class="char-role">ДИРЕКТОР</div><div class="char-name">Евгений</div></div>
+<div class="char char-girl"><div class="char-emo">👩💼</div><div class="char-role">РОП</div><div class="char-name">Снежана</div></div>
+<div class="char char-boy2"><div class="char-emo">‍🏭</div><div class="char-role">ДИРЕКТОР</div><div class="char-name">Евгений</div></div>
 </div>
 <div class="card">
 <div class="sh"><div class="shb shb-blue">📋</div><div class="sh-title">Что тебя ждёт</div></div>
 <ul class="cl">
 <li><span>📖</span> 4 блока теории с живыми примерами</li>
 <li><span>🎯</span> 6 тест-вопросов на понимание</li>
-<li><span>✍️</span> 4 практических задания с автопроверкой</li>
-<li><span>📥</span> Чек-лист для скачивания и работы</li>
-<li><span>🏆</span> Результат и персональная обратная связь</li>
+<li><span>️</span> 4 практических задания с автопроверкой</li>
+<li><span></span> Чек-лист для скачивания и работы</li>
+<li><span></span> Результат и персональная обратная связь</li>
 </ul>
 </div>
 <button class="btn btn-blue" onclick="showLearn()">Начать обучение 🚀</button>
 </div>
 <div id="s-learn" class="screen">
 <div class="top-bar">
-<div class="logo"><span class="logo-seal">🦭</span><div><span class="logo-name">Мимис</span><span class="logo-tag">теория</span></div></div>
+<div class="logo"><span class="logo-seal"></span><div><span class="logo-name">Мимис</span><span class="logo-tag">теория</span></div></div>
 </div>
 <div class="nav-dots" id="ldots"></div>
 <div id="lbody"></div>
@@ -191,10 +190,10 @@ details[open] summary{border-radius:12px 12px 0 0;}
 <div class="si">🦭</div>
 </div>
 <script>
-const IMG_BASE='https://soul-love-109.github.io/Mimis_SMART/';
-const IMG_CHECKLIST=IMG_BASE+'%D1%87%D0%B5%D0%BA-%D0%BB%D0%B8%D1%81%D1%82.jpg';
-const IMG_GOOD=IMG_BASE+'%D0%BF%D0%BE%D0%B7%D0%B4%D1%80%D0%B0%D0%B2%D0%BB%D1%8F%D0%B5%D0%BC.jpg';
-const IMG_MID=IMG_BASE+'%D0%BF%D1%80%D0%BE%D0%B4%D0%BE%D0%BB%D0%B6%D0%B0%D0%B9.jpg';
+// ПУТИ К КАРТИНКАМ (переименуйте файлы на GitHub на латиницу!)
+const IMG_CHECKLIST='https://soul-love-109.github.io/Mimis_SMART/checklist.jpg';
+const IMG_GOOD='https://soul-love-109.github.io/Mimis_SMART/congrats.jpg';
+const IMG_MID='https://soul-love-109.github.io/Mimis_SMART/continue.jpg';
 
 const TIPS=["Хорошая задача — коллега сразу берётся за работу!","Срок — это дата и время. Не «срочно», а «до пятницы 17:00»!","Главный вопрос: смог бы ТЫ выполнить эту задачу по своему тексту?","Вводные данные экономят команде по часу в день.","Ты справляешься! Каждый шаг делает тебя лучше 🐾"];
 let tipI=0;
@@ -208,7 +207,7 @@ const LEARN=[
 <ul class="cl">
 <li><span>❓</span> Иван задаёт 5 уточняющих вопросов вместо работы</li>
 <li><span>⏳</span> Задача откладывается или выполняется неверно</li>
-<li><span>🔄</span> Снежана просит объяснить всё снова</li>
+<li><span></span> Снежана просит объяснить всё снова</li>
 <li><span>😤</span> Евгений раздражён — ему нечего ответить без данных</li>
 </ul>
 </div>
@@ -216,7 +215,7 @@ const LEARN=[
 <div style="font-size:11px;font-weight:700;color:#E91E8C;letter-spacing:.5px;margin-bottom:7px;">ГЛАВНЫЙ ВОПРОС МИМИСА</div>
 <div style="font-size:15px;font-weight:800;color:#1A5276;line-height:1.6;">«Если бы эту задачу прислали мне —<br>смог бы я начать работу прямо сейчас,<br>не задав ни одного вопроса?»</div>
 </div>`},
-{title:"5 элементов хорошей задачи",icon:"",html:`
+{title:"5 элементов хорошей задачи",icon:"📋",html:`
 <div class="sh"><div class="shb shb-blue">5</div><div class="sh-title">Хорошая задача отвечает на 5 вопросов</div></div>
 <div class="card">
 <div class="det-row"><span>✅ Что нужно сделать?</span><span class="tag tag-b">действие</span></div>
@@ -235,7 +234,7 @@ const LEARN=[
 <div class="ex ex-good"><div class="ex-lbl">✅ ХОРОШО</div><p>Иван, нужно проверить договор поставки по ООО «Байкал Маркет». Клиент просит отсрочку 14 дней, первая поставка на 180 000 руб. Нужны замечания или согласование. Срок: пятница 17:00.</p></div>
 <div class="divider"></div>
 <div style="font-size:11px;font-weight:700;color:#E91E8C;letter-spacing:.5px;margin-bottom:7px;">СИТУАЦИЯ 2 — ДЛЯ СНЕЖАНЫ (РОП)</div>
-<div class="ex ex-bad" style="margin-bottom:5px;"><div class="ex-lbl"> Нужно согласовать условия.</div></div>
+<div class="ex ex-bad" style="margin-bottom:5px;"><div class="ex-lbl">❌ Нужно согласовать условия.</div></div>
 <div class="ex ex-good"><div class="ex-lbl">✅ ХОРОШО</div><p>Снежана, прошу согласовать индивидуальные условия по ООО «Байкал Сувенир». Клиент: 10 магазинов, план ~500 000 руб./мес., просит скидку 5%. Считаю целесообразным — клиент перспективный. Ответ нужен до 12:00 завтра.</p></div>
 <div class="divider"></div>
 <div style="font-size:11px;font-weight:700;color:#E91E8C;letter-spacing:.5px;margin-bottom:7px;">СИТУАЦИЯ 3 — ДЛЯ ЕВГЕНИЯ (ДИРЕКТОР)</div>
@@ -279,7 +278,7 @@ const QUIZ=[
 {type:"o",q:"Задача для бухгалтерии",ctx:"Клиент запросил акт сверки. Период: январь–июнь 2025 года. Документ нужен сегодня до 17:00.",hint:"Укажи клиента (можешь придумать название), период и точный срок",crit:["Что нужно сделать (подготовить акт сверки)","Указан клиент","Чётко указан период (январь–июнь 2025)","Ожидаемый результат (готовый документ)","Срок (сегодня до 17:00)","Задача понятна без уточнений"]}
 ];
 
-// Ключевые слова для автопроверки открытых вопросов
+// КЛЮЧЕВЫЕ СЛОВА ДЛЯ АВТОПРОВЕРКИ ОТКРЫТЫХ ВОПРОСОВ
 const KW=[
   // Вопрос 7 — Иван (юрист)
   {
@@ -343,9 +342,9 @@ function buildFeedback(scores,crit){
   const missed=crit.filter((_,i)=>!scores[i]);
   let msg='';
   if(ok===6)msg='🎉 Отлично! Задача полная, понятная и самодостаточная. Коллега сразу возьмётся за работу!';
-  else if(ok>=4)msg='👍 Почти отлично! Не хватает: '+missed.map(m=>'«'+m+'»').join(', ')+'. Добавь эти детали — и задача станет идеальной.';
+  else if(ok>=4)msg=' Почти отлично! Не хватает: '+missed.map(m=>'«'+m+'»').join(', ')+'. Добавь эти детали — и задача станет идеальной.';
   else if(ok>=2)msg='💭 Неплохое начало, но не хватает конкретики. Обрати внимание на: '+missed.map(m=>'«'+m+'»').join(', ')+'. Перечитай теорию про 5 элементов задачи.';
-  else msg=' Пока задача непонятна. Главный вопрос Мимиса: «Если бы эту задачу прислали тебе — ты смог бы начать работу прямо сейчас?» Добавь: '+missed.slice(0,3).map(m=>'«'+m+'»').join(', ')+'.';
+  else msg='Пока задача непонятна. Главный вопрос Мимиса: «Если бы эту задачу прислали тебе — ты смог бы начать работу прямо сейчас?» Добавь: '+missed.slice(0,3).map(m=>'«'+m+'»').join(', ')+'.';
   return {ok,msg};
 }
 
@@ -360,7 +359,7 @@ const b=LEARN[ls];
 let html=b.html;
 document.getElementById('lbody').innerHTML=`<div class="card" style="margin-bottom:14px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:13px;"><span style="font-size:26px;">${b.icon}</span><div style="font-size:17px;font-weight:800;color:#1A5276;">${b.title}</div><span style="margin-left:auto;font-size:12px;color:#5D6D7E;font-weight:600;">${ls+1}/${LEARN.length}</span></div>${html}</div>`;
 document.getElementById('lback').style.display=ls===0?'none':'block';
-document.getElementById('lnext').textContent=ls===LEARN.length-1?'Перейти к тесту 🎯':'Далее →';
+document.getElementById('lnext').textContent=ls===LEARN.length-1?'Перейти к тесту ':'Далее →';
 }
 function learnNav(d){
 if(d===1&&ls===LEARN.length-1){setScreen('s-quiz');qs=0;renderQ();return;}
@@ -374,7 +373,7 @@ if(q.type==='c'){
 html+=`<div class="qt qt-ch">🎯 ВЫБЕРИ ПРАВИЛЬНЫЙ ОТВЕТ</div><div class="qtitle">${q.q}</div>`;
 const prev=chA[qs];
 html+=q.opts.map((o,i)=>{let cls='ans-btn';if(prev!==undefined){if(i===q.correct)cls+=' correct';else if(i===prev&&prev!==q.correct)cls+=' wrong';}return`<button class="${cls}" onclick="ansC(${i})" ${prev!==undefined?'disabled':''}>${o}</button>`;}).join('');
-if(prev!==undefined){const ok=prev===q.correct;html+=`<div class="fb ${ok?'fb-good':'fb-bad'}">${ok?'🎉 ':'💭 '}${q.fb[prev]}</div>`;html+=`<button class="btn btn-blue" onclick="nextQ()" style="margin-top:12px;">${qs<tot-1?'Следующий вопрос →':'Завершить тест 🏁'}</button>`;}
+if(prev!==undefined){const ok=prev===q.correct;html+=`<div class="fb ${ok?'fb-good':'fb-bad'}">${ok?' ':'💭 '}${q.fb[prev]}</div>`;html+=`<button class="btn btn-blue" onclick="nextQ()" style="margin-top:12px;">${qs<tot-1?'Следующий вопрос →':'Завершить тест 🏁'}</button>`;}
 } else {
 html+=`<div class="qt qt-op">✍️ ПРАКТИКА — НАПИШИ ЗАДАЧУ</div><div class="qtitle">${q.q}</div>`;
 html+=`<div class="qctx"><div class="qctx-lbl">📋 ИСХОДНЫЕ ДАННЫЕ:</div>${q.ctx}</div>`;
@@ -442,8 +441,8 @@ const html=`<div style="text-align:center;padding:16px 0 8px;"><div style="font-
 Или нажми кнопку ниже, чтобы открыть почтовый клиент с готовым письмом:
 </div>
 <div class="btn-row">
-<button class="btn btn-outline" onclick="sendEmail()"> Открыть письмо</button>
-<button class="btn btn-blue" onclick="restartAll()"> Пройти снова</button>
+<button class="btn btn-outline" onclick="sendEmail()">📧 Открыть письмо</button>
+<button class="btn btn-blue" onclick="restartAll()">🔄 Пройти снова</button>
 </div>
 <div style="margin-top:10px;"><button class="btn btn-outline" onclick="backToLearn()">📖 К теории</button></div>`;
 document.getElementById('rbody').innerHTML=html;
