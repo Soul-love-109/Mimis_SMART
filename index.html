@@ -1,603 +1,449 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мимис — Как ставить задачи</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Nunito', sans-serif; }
-  .app { min-height: 600px; background: #F0F8FF; font-family: 'Nunito', sans-serif; position: relative; overflow: hidden; }
-  .screen { display: none; padding: 24px 20px; }
-  .screen.active { display: block; }
-
-  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; justify-content: center; }
-  .logo-seal { font-size: 36px; }
-  .logo-text { font-size: 22px; font-weight: 800; color: #1A5276; letter-spacing: -0.5px; }
-  .logo-sub { font-size: 12px; color: #5DADE2; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-
-  .hero-card { background: white; border-radius: 20px; padding: 28px 24px; text-align: center; border: 2px solid #AED6F1; margin-bottom: 20px; position: relative; overflow: hidden; }
-  .hero-card::before { content: ''; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: #E8F4FD; border-radius: 50%; }
-  .hero-card::after { content: ''; position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: #FDEEF5; border-radius: 50%; }
-  .hero-title { font-size: 20px; font-weight: 800; color: #1A5276; margin-bottom: 8px; position: relative; z-index: 1; }
-  .hero-desc { font-size: 14px; color: #5D6D7E; line-height: 1.6; position: relative; z-index: 1; }
-
-  .seal-bubble { display: flex; gap: 12px; align-items: flex-start; background: white; border-radius: 16px; padding: 16px; border: 1.5px solid #AED6F1; margin-bottom: 16px; }
-  .seal-emoji { font-size: 40px; flex-shrink: 0; }
-  .seal-text { font-size: 14px; color: #2C3E50; line-height: 1.6; }
-  .seal-name { font-size: 11px; color: #5DADE2; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
-
-  .btn-primary { background: linear-gradient(135deg, #5DADE2, #2E86C1); color: white; border: none; border-radius: 50px; padding: 14px 32px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; letter-spacing: 0.3px; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 15px rgba(93,173,226,0.35); }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(93,173,226,0.45); }
-  .btn-primary:active { transform: scale(0.98); }
-
-  .btn-answer { background: white; color: #1A5276; border: 2px solid #AED6F1; border-radius: 12px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; text-align: left; margin-bottom: 8px; transition: all 0.2s; line-height: 1.4; }
-  .btn-answer:hover { border-color: #5DADE2; background: #EBF5FB; }
-  .btn-answer.correct { border-color: #27AE60; background: #EAFAF1; color: #1E8449; }
-  .btn-answer.wrong { border-color: #E74C3C; background: #FDEDEC; color: #C0392B; }
-  .btn-answer:disabled { cursor: not-allowed; opacity: 0.8; }
-
-  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .step-badge { background: #5DADE2; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
-  .step-title { font-size: 17px; font-weight: 700; color: #1A5276; }
-
-  .example-card { border-radius: 14px; padding: 14px; margin-bottom: 12px; }
-  .example-bad { background: #FEF9E7; border: 1.5px solid #F9E79F; }
-  .example-good { background: #EAFAF1; border: 1.5px solid #A9DFBF; }
-  .example-label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
-  .label-bad { color: #B7950B; }
-  .label-good { color: #1E8449; }
-  .example-text { font-size: 13px; color: #2C3E50; line-height: 1.6; }
-
-  .checklist { list-style: none; }
-  .checklist li { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: #2C3E50; padding: 6px 0; border-bottom: 1px solid #EBF5FB; }
-  .checklist li:last-child { border-bottom: none; }
-  .check-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-
-  .progress-bar { background: #D6EAF8; border-radius: 50px; height: 8px; margin-bottom: 6px; overflow: hidden; }
-  .progress-fill { background: linear-gradient(90deg, #5DADE2, #2E86C1); height: 100%; border-radius: 50px; transition: width 0.4s ease; }
-  .progress-label { font-size: 12px; color: #5D6D7E; text-align: right; margin-bottom: 20px; }
-
-  .question-card { background: white; border-radius: 16px; padding: 20px; border: 1.5px solid #D6EAF8; margin-bottom: 16px; }
-  .question-title { font-size: 11px; font-weight: 700; color: #5DADE2; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .question-text { font-size: 15px; font-weight: 700; color: #1A5276; margin-bottom: 16px; line-height: 1.5; }
-  .question-context { background: #EBF5FB; border-radius: 10px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #2C3E50; line-height: 1.6; }
-  .context-title { font-size: 11px; font-weight: 700; color: #2E86C1; margin-bottom: 6px; letter-spacing: 0.5px; }
-
-  textarea.answer-field { width: 100%; border: 2px solid #AED6F1; border-radius: 12px; padding: 12px; font-size: 14px; color: #2C3E50; font-family: 'Nunito', sans-serif; resize: vertical; min-height: 90px; outline: none; line-height: 1.6; background: #FAFEFF; }
-  textarea.answer-field:focus { border-color: #5DADE2; background: white; }
-
-  .feedback-box { border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 13px; line-height: 1.6; }
-  .feedback-good { background: #EAFAF1; border: 1.5px solid #A9DFBF; color: #1E8449; }
-  .feedback-bad { background: #FDEDEC; border: 1.5px solid #F1948A; color: #922B21; }
-  .feedback-loading { background: #EBF5FB; border: 1.5px solid #AED6F1; color: #2E86C1; }
-
-  .score-display { text-align: center; padding: 28px 20px; }
-  .score-big { font-size: 60px; font-weight: 800; color: #1A5276; line-height: 1; }
-  .score-max { font-size: 20px; color: #5D6D7E; margin-bottom: 16px; }
-  .score-seal { font-size: 56px; margin: 12px 0; }
-  .score-title { font-size: 20px; font-weight: 800; color: #1A5276; margin-bottom: 8px; }
-  .score-desc { font-size: 14px; color: #5D6D7E; line-height: 1.6; margin-bottom: 20px; }
-
-  .criteria-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #EBF5FB; font-size: 13px; }
-  .criteria-row:last-child { border-bottom: none; }
-  .criteria-name { color: #2C3E50; }
-  .criteria-score { font-weight: 700; color: #2E86C1; }
-
-  .nav-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 16px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #D6EAF8; transition: background 0.3s; }
-  .dot.active { background: #5DADE2; }
-  .dot.done { background: #27AE60; }
-
-  .section-divider { height: 1px; background: #D6EAF8; margin: 20px 0; }
-
-  .pink-accent { color: #E91E8C; }
-  .blue-accent { color: #2E86C1; }
-
-  .btn-secondary { background: white; color: #2E86C1; border: 2px solid #AED6F1; border-radius: 50px; padding: 11px 24px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-  .btn-secondary:hover { border-color: #5DADE2; background: #EBF5FB; }
-
-  .loading-dots { display: inline-flex; gap: 4px; margin-left: 4px; }
-  .loading-dots span { width: 5px; height: 5px; border-radius: 50%; background: #2E86C1; animation: bounce 1.2s infinite; }
-  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-
-  .mimis-corner { position: fixed; bottom: 20px; right: 20px; z-index: 100; }
-  .mimis-float { font-size: 44px; cursor: pointer; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
-  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-  .mimis-tip { background: white; border: 2px solid #AED6F1; border-radius: 14px; padding: 10px 14px; font-size: 13px; color: #1A5276; font-weight: 600; max-width: 200px; margin-bottom: 8px; line-height: 1.4; box-shadow: 0 4px 16px rgba(93,173,226,0.2); display: none; }
-  .mimis-tip.show { display: block; }
-
-  .tag { display: inline-block; background: #EBF5FB; color: #2E86C1; border-radius: 50px; padding: 3px 10px; font-size: 11px; font-weight: 700; margin: 2px; }
-  .tag-pink { background: #FDEEF5; color: #E91E8C; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:#F0F8FF;color:#1A3A5C;min-height:100vh;}
+.app{max-width:720px;margin:0 auto;padding:16px 16px 80px;}
+.screen{display:none;}
+.screen.active{display:block;}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 0 18px;}
+.logo{display:flex;align-items:center;gap:8px;}
+.logo-seal{font-size:30px;}
+.logo-name{font-size:19px;font-weight:900;color:#1A5276;}
+.logo-tag{font-size:11px;color:#5DADE2;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;}
+.card{background:white;border-radius:20px;padding:20px;border:1.5px solid #D6EAF8;margin-bottom:14px;}
+.card-pink{border-color:#F5B7D1;background:#FEF9FC;}
+.card-green{border-color:#A9DFBF;background:#F4FBF7;}
+.card-grad{background:linear-gradient(135deg,#EBF5FB,#FDEEF5);}
+.hero{background:white;border-radius:24px;padding:26px 22px;text-align:center;border:2px solid #AED6F1;margin-bottom:18px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:#EBF5FB;border-radius:50%;}
+.hero::after{content:'';position:absolute;bottom:-30px;left:-30px;width:100px;height:100px;background:#FDEEF5;border-radius:50%;}
+.hero h1{font-size:21px;font-weight:900;color:#1A5276;position:relative;z-index:1;line-height:1.3;margin-bottom:10px;}
+.hero p{font-size:14px;color:#5D6D7E;line-height:1.6;position:relative;z-index:1;}
+.hero-emo{font-size:38px;margin:8px 0;position:relative;z-index:1;}
+.sb{display:flex;gap:12px;align-items:flex-start;background:white;border-radius:16px;padding:15px;border:1.5px solid #AED6F1;margin-bottom:14px;}
+.sb-emo{font-size:40px;flex-shrink:0;}
+.sb-who{font-size:11px;font-weight:700;color:#5DADE2;letter-spacing:.5px;margin-bottom:3px;}
+.sb-txt{font-size:13px;color:#2C3E50;line-height:1.6;}
+.btn{display:block;width:100%;border:none;border-radius:50px;padding:13px 26px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;transition:transform .15s,box-shadow .15s;text-align:center;}
+.btn-blue{background:linear-gradient(135deg,#5DADE2,#2E86C1);color:white;box-shadow:0 4px 14px rgba(93,173,226,.35);}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(93,173,226,.45);}
+.btn-pink{background:linear-gradient(135deg,#F1948A,#E74C7C);color:white;box-shadow:0 3px 12px rgba(231,76,124,.3);}
+.btn-pink:hover{transform:translateY(-2px);}
+.btn-outline{background:white;color:#2E86C1;border:2px solid #AED6F1;}
+.btn-outline:hover{border-color:#5DADE2;background:#EBF5FB;}
+.btn-row{display:flex;gap:10px;margin-top:12px;}
+.btn-row .btn{margin-top:0;}
+.nav-dots{display:flex;justify-content:center;gap:6px;margin-bottom:14px;}
+.dot{width:10px;height:10px;border-radius:50%;background:#D6EAF8;transition:all .3s;}
+.dot.active{background:#5DADE2;transform:scale(1.2);}
+.dot.done{background:#27AE60;}
+.ex{border-radius:14px;padding:13px;margin-bottom:9px;}
+.ex-bad{background:#FEF9E7;border:1.5px solid #F9E79F;}
+.ex-good{background:#EAFAF1;border:1.5px solid #A9DFBF;}
+.ex-lbl{font-size:11px;font-weight:800;letter-spacing:.5px;margin-bottom:5px;}
+.ex-bad .ex-lbl{color:#B7950B;}
+.ex-good .ex-lbl{color:#1E8449;}
+.ex p{font-size:13px;color:#2C3E50;line-height:1.6;}
+.cl{list-style:none;}
+.cl li{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#2C3E50;padding:6px 0;border-bottom:1px solid #EBF5FB;}
+.cl li:last-child{border-bottom:none;}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.shb{border-radius:50%;width:27px;height:27px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:white;}
+.shb-blue{background:#5DADE2;}
+.shb-pink{background:#E91E8C;}
+.shb-green{background:#27AE60;}
+.sh-title{font-size:16px;font-weight:800;color:#1A5276;}
+.prog-bar{background:#D6EAF8;border-radius:50px;height:8px;overflow:hidden;margin-bottom:4px;}
+.prog-fill{background:linear-gradient(90deg,#5DADE2,#2E86C1);height:100%;border-radius:50px;transition:width .4s;}
+.prog-lbl{font-size:12px;color:#5D6D7E;text-align:right;margin-bottom:16px;}
+.qc{background:white;border-radius:16px;padding:18px;border:1.5px solid #D6EAF8;margin-bottom:12px;}
+.qt{font-size:11px;font-weight:700;letter-spacing:.5px;margin-bottom:7px;}
+.qt-ch{color:#2E86C1;}
+.qt-op{color:#E91E8C;}
+.qtitle{font-size:15px;font-weight:700;color:#1A5276;margin-bottom:13px;line-height:1.5;}
+.qctx{background:#EBF5FB;border-radius:10px;padding:11px;margin-bottom:12px;font-size:13px;color:#2C3E50;line-height:1.6;}
+.qctx-lbl{font-size:11px;font-weight:700;color:#2E86C1;margin-bottom:4px;letter-spacing:.5px;}
+.qhint{font-size:12px;color:#E91E8C;font-weight:600;margin-bottom:11px;}
+.ans-btn{background:white;color:#1A5276;border:2px solid #AED6F1;border-radius:12px;padding:11px 14px;font-size:14px;font-weight:600;cursor:pointer;width:100%;text-align:left;margin-bottom:7px;font-family:'Nunito',sans-serif;transition:all .2s;line-height:1.4;}
+.ans-btn:hover:not(:disabled){border-color:#5DADE2;background:#EBF5FB;}
+.ans-btn.correct{border-color:#27AE60;background:#EAFAF1;color:#1E8449;}
+.ans-btn.wrong{border-color:#E74C3C;background:#FDEDEC;color:#C0392B;}
+.ans-btn:disabled{cursor:not-allowed;}
+.af{width:100%;border:2px solid #AED6F1;border-radius:12px;padding:11px;font-size:14px;color:#2C3E50;font-family:'Nunito',sans-serif;resize:vertical;min-height:95px;outline:none;line-height:1.6;background:#FAFEFF;}
+.af:focus{border-color:#5DADE2;background:white;}
+.af:disabled{background:#F8F8F8;color:#666;}
+.fb{border-radius:10px;padding:11px 13px;margin-top:9px;font-size:13px;line-height:1.6;}
+.fb-good{background:#EAFAF1;border:1.5px solid #A9DFBF;color:#1E8449;}
+.fb-ok{background:#EBF5FB;border:1.5px solid #AED6F1;color:#2874A6;}
+.fb-bad{background:#FDEDEC;border:1.5px solid #F1948A;color:#922B21;}
+.fb-load{background:#EBF5FB;border:1.5px solid #AED6F1;color:#2E86C1;}
+.crit-card{background:white;border-radius:14px;padding:13px;border:1.5px solid #D6EAF8;margin-top:12px;}
+.crit-lbl{font-size:11px;font-weight:700;color:#5DADE2;letter-spacing:.5px;margin-bottom:9px;}
+.cr{display:flex;align-items:center;gap:7px;font-size:13px;color:#2C3E50;padding:5px 0;border-bottom:1px solid #EBF5FB;}
+.cr:last-child{border-bottom:none;}
+.cr.ok{color:#1E8449;}
+.cr.no{color:#C0392B;}
+.cr-n{font-size:11px;font-weight:700;flex-shrink:0;width:16px;}
+.tag{display:inline-block;border-radius:50px;padding:3px 9px;font-size:11px;font-weight:700;margin:2px;}
+.tag-b{background:#EBF5FB;color:#2E86C1;}
+.tag-p{background:#FDEEF5;color:#E91E8C;}
+.tag-g{background:#EAFAF1;color:#1E8449;}
+.det-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #EBF5FB;font-size:14px;}
+.det-row:last-child{border-bottom:none;}
+.det-sc{font-weight:700;color:#2E86C1;}
+.chars{display:flex;gap:8px;margin-bottom:14px;}
+.char{flex:1;border-radius:14px;padding:12px 8px;text-align:center;}
+.char-boy{background:#EBF5FB;border:1.5px solid #AED6F1;}
+.char-girl{background:#FDEEF5;border:1.5px solid #F5B7D1;}
+.char-boy2{background:#EAFAF1;border:1.5px solid #A9DFBF;}
+.char-emo{font-size:28px;margin-bottom:4px;}
+.char-role{font-size:10px;font-weight:700;color:#5D6D7E;letter-spacing:.5px;}
+.char-name{font-size:14px;font-weight:800;color:#1A5276;}
+.score-big{font-size:68px;font-weight:900;color:#1A5276;line-height:1;text-align:center;}
+.score-of{font-size:20px;color:#5D6D7E;text-align:center;margin-bottom:10px;}
+.score-img{width:100%;border-radius:18px;margin:12px 0;box-shadow:0 4px 20px rgba(93,173,226,.2);}
+.divider{height:1px;background:#D6EAF8;margin:16px 0;}
+.ldots{display:inline-flex;gap:4px;margin-left:4px;vertical-align:middle;}
+.ldots span{width:5px;height:5px;border-radius:50%;background:#2E86C1;animation:ld 1.2s infinite;}
+.ldots span:nth-child(2){animation-delay:.2s;}
+.ldots span:nth-child(3){animation-delay:.4s;}
+@keyframes ld{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+#fseal{position:fixed;bottom:16px;right:16px;z-index:999;cursor:pointer;text-align:right;}
+#fseal .si{font-size:40px;animation:fl 3s ease-in-out infinite;display:inline-block;}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+#ftip{background:white;border:2px solid #AED6F1;border-radius:14px;padding:9px 12px;font-size:12px;color:#1A5276;font-weight:600;max-width:170px;margin-bottom:5px;line-height:1.4;box-shadow:0 3px 12px rgba(93,173,226,.2);display:none;}
+#ftip.show{display:block;}
+details summary{cursor:pointer;font-size:13px;font-weight:700;color:#5DADE2;padding:10px 13px;background:white;border-radius:12px;border:1.5px solid #D6EAF8;list-style:none;margin-top:10px;}
+details summary::-webkit-details-marker{display:none;}
+details[open] summary{border-radius:12px 12px 0 0;}
+.dl-section{background:linear-gradient(135deg,#EBF5FB,#FDEEF5);border-radius:18px;padding:18px;border:1.5px solid #D6EAF8;margin-bottom:14px;text-align:center;}
+.dl-section img{width:100%;border-radius:12px;margin:10px 0;box-shadow:0 4px 16px rgba(93,173,226,.2);}
+@media(max-width:480px){.chars{flex-wrap:wrap;}.char{min-width:calc(33% - 6px);}}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app">
 
-<div class="app" id="app">
-
-  <div id="screen-welcome" class="screen active">
-    <div class="logo">
-      <span class="logo-seal">🦭</span>
-      <div>
-        <div class="logo-text">Мимис</div>
-        <div class="logo-sub">обучение команды</div>
-      </div>
-    </div>
-
-    <div class="hero-card">
-      <div class="hero-title">Как ставить задачи,<br>чтобы тебя понимали<br>с первого раза</div>
-      <div style="margin: 12px 0 8px; font-size: 28px;">✨</div>
-      <div class="hero-desc">Короткий практичный курс для тех,<br>кто хочет работать быстрее и без лишних переписок</div>
-    </div>
-
-    <div class="seal-bubble">
-      <span class="seal-emoji">🦭</span>
-      <div>
-        <div class="seal-name">МИМИС ГОВОРИТ</div>
-        <div class="seal-text">Привет! Я буду рядом всё обучение. Это займёт минут 10–15, зато потом ты сэкономишь часы! Поехали? 🐾</div>
-      </div>
-    </div>
-
-    <div style="background: white; border-radius: 14px; padding: 16px; border: 1.5px solid #D6EAF8; margin-bottom: 20px;">
-      <div style="font-size: 13px; font-weight: 700; color: #5DADE2; margin-bottom: 10px; letter-spacing: 0.5px;">ЧТО ВНУТРИ</div>
-      <ul class="checklist">
-        <li><span class="check-icon">📖</span> 3 блока теории с примерами из жизни Мимис</li>
-        <li><span class="check-icon">🎯</span> 6 тест-вопросов на понимание</li>
-        <li><span class="check-icon">✍️</span> 4 практических задания с живой проверкой</li>
-        <li><span class="check-icon">🏆</span> Результат и персональная обратная связь</li>
-      </ul>
-    </div>
-
-    <button class="btn-primary" onclick="showLearn()">Начать обучение 🚀</button>
+<div id="s-welcome" class="screen active">
+  <div class="top-bar">
+    <div class="logo"><span class="logo-seal">🦭</span><div><span class="logo-name">Мимис</span><span class="logo-tag">обучение</span></div></div>
   </div>
-
-  <div id="screen-learn" class="screen">
-    <div class="nav-dots" id="learn-dots"></div>
-    <div id="learn-content"></div>
-    <div style="display: flex; gap: 10px; margin-top: 16px;">
-      <button class="btn-secondary" id="learn-back" onclick="learnNav(-1)">← Назад</button>
-      <button class="btn-primary" id="learn-next" onclick="learnNav(1)" style="margin-top:0;">Далее →</button>
-    </div>
+  <div class="hero">
+    <div class="hero-emo">✨</div>
+    <h1>Как ставить задачи,<br>чтобы тебя понимали<br>с первого раза</h1>
+    <p style="margin-top:8px;">Короткий практичный курс — без скуки, с примерами из жизни команды Мимис</p>
   </div>
-
-  <div id="screen-quiz" class="screen">
-    <div id="quiz-content"></div>
+  <div class="sb">
+    <span class="sb-emo">🦭</span>
+    <div><div class="sb-who">МИМИС ГОВОРИТ</div>
+    <div class="sb-txt">Привет! Я Мимис — и я буду рядом всё обучение. Займёт минут 15, зато потом сэкономишь часы! Поехали? 🐾</div></div>
   </div>
-
-  <div id="screen-result" class="screen">
-    <div id="result-content"></div>
+  <div class="chars">
+    <div class="char char-boy"><div class="char-emo">👨‍⚖️</div><div class="char-role">ЮРИСТ</div><div class="char-name">Иван</div></div>
+    <div class="char char-girl"><div class="char-emo">👩‍💼</div><div class="char-role">РОП</div><div class="char-name">Снежана</div></div>
+    <div class="char char-boy2"><div class="char-emo">👨‍🏭</div><div class="char-role">ДИРЕКТОР</div><div class="char-name">Евгений</div></div>
   </div>
+  <div class="card">
+    <div class="sh"><div class="shb shb-blue">📋</div><div class="sh-title">Что тебя ждёт</div></div>
+    <ul class="cl">
+      <li><span>📖</span> 4 блока теории с живыми примерами</li>
+      <li><span>🎯</span> 6 тест-вопросов на понимание</li>
+      <li><span>✍️</span> 4 практических задания с живой AI-проверкой</li>
+      <li><span>📥</span> Чек-лист для скачивания и работы</li>
+      <li><span>🏆</span> Результат и персональная обратная связь</li>
+    </ul>
+  </div>
+  <button class="btn btn-blue" onclick="showLearn()">Начать обучение 🚀</button>
+</div>
+
+<div id="s-learn" class="screen">
+  <div class="top-bar">
+    <div class="logo"><span class="logo-seal">🦭</span><div><span class="logo-name">Мимис</span><span class="logo-tag">теория</span></div></div>
+  </div>
+  <div class="nav-dots" id="ldots"></div>
+  <div id="lbody"></div>
+  <div class="btn-row">
+    <button class="btn btn-outline" id="lback" onclick="learnNav(-1)">← Назад</button>
+    <button class="btn btn-blue" id="lnext" onclick="learnNav(1)">Далее →</button>
+  </div>
+</div>
+
+<div id="s-quiz" class="screen">
+  <div class="top-bar">
+    <div class="logo"><span class="logo-seal">🦭</span><div><span class="logo-name">Мимис</span><span class="logo-tag">тест</span></div></div>
+  </div>
+  <div id="qbody"></div>
+</div>
+
+<div id="s-result" class="screen">
+  <div class="top-bar">
+    <div class="logo"><span class="logo-seal">🦭</span><div><span class="logo-name">Мимис</span><span class="logo-tag">результат</span></div></div>
+  </div>
+  <div id="rbody"></div>
+</div>
 
 </div>
 
+<div id="fseal" onclick="toggleTip()">
+  <div id="ftip"></div>
+  <div class="si">🦭</div>
+</div>
+
 <script>
-const learnBlocks = [
-  {
-    title: "Почему это важно?",
-    icon: "💡",
-    content: `
-      <div class="seal-bubble">
-        <span class="seal-emoji">🦭</span>
-        <div>
-          <div class="seal-name">МИМИС ОБЪЯСНЯЕТ</div>
-          <div class="seal-text">Когда задача непонятна — коллега не молчит. Он задаёт вопросы, ждёт ответа, делает что-то не то... Одна непонятная задача может стоить команде полдня!</div>
-        </div>
-      </div>
-      <div class="section-header">
-        <div class="step-badge">!</div>
-        <div class="step-title">Что происходит с плохой задачей?</div>
-      </div>
-      <ul class="checklist" style="background:white; border-radius:14px; padding:14px 16px; border: 1.5px solid #D6EAF8;">
-        <li><span class="check-icon">❓</span> Юрист Ваня задаёт 5 уточняющих вопросов</li>
-        <li><span class="check-icon">⏳</span> Задача откладывается или делается неправильно</li>
-        <li><span class="check-icon">🔄</span> Ты объясняешь то же самое снова и снова</li>
-        <li><span class="check-icon">😤</span> Все раздражены, время потеряно</li>
-      </ul>
-      <div style="background: #FDEEF5; border-radius:14px; padding:16px; margin-top:16px; border: 1.5px solid #F5B7D1; text-align:center;">
-        <div style="font-size:13px; font-weight:700; color:#E91E8C; margin-bottom:6px;">ГЛАВНЫЙ ВОПРОС</div>
-        <div style="font-size:15px; font-weight:700; color:#1A5276; line-height:1.5;">Если бы эту задачу прислали мне —<br>смог бы я начать работу прямо сейчас,<br>не задав ни одного вопроса?</div>
-      </div>
-    `
-  },
-  {
-    title: "5 элементов хорошей задачи",
-    icon: "📋",
-    content: `
-      <div class="section-header">
-        <div class="step-badge">5</div>
-        <div class="step-title">Хорошая задача отвечает на 5 вопросов</div>
-      </div>
-      <div style="background:white; border-radius:14px; padding:16px; border: 1.5px solid #D6EAF8; margin-bottom:16px;">
-        <div class="criteria-row"><span class="criteria-name">✅ Что нужно сделать?</span><span class="tag">действие</span></div>
-        <div class="criteria-row"><span class="criteria-name">✅ По кому / по чему?</span><span class="tag">объект</span></div>
-        <div class="criteria-row"><span class="criteria-name">✅ Какие есть вводные?</span><span class="tag">данные</span></div>
-        <div class="criteria-row"><span class="criteria-name">✅ Какой результат нужен?</span><span class="tag">итог</span></div>
-        <div class="criteria-row" style="border:none"><span class="criteria-name">✅ Когда нужен ответ?</span><span class="tag">срок</span></div>
-      </div>
-      <div style="font-size:11px; font-weight:700; color:#5DADE2; letter-spacing:0.5px; margin-bottom:10px;">СРАВНИ ЗАДАЧИ</div>
-      <div class="example-card example-bad">
-        <div class="example-label label-bad">❌ ТАК НЕ НАДО</div>
-        <div class="example-text">Привет! Согласуй договор, пожалуйста.</div>
-      </div>
-      <div class="example-card example-good">
-        <div class="example-label label-good">✅ ВОТ ТАК ХОРОШО</div>
-        <div class="example-text"><strong>Привет, Иван!</strong><br>Нужно проверить договор поставки по клиенту ООО «Байкал Сувенир».<br><br><strong>Вводные:</strong> 5 магазинов, первая поставка 180 000 руб., клиент просит отсрочку 30 дней.<br><br><strong>Результат:</strong> согласование или список замечаний.<br><strong>Срок:</strong> до 16:00 пятницы.</div>
-      </div>
-      <div class="seal-bubble" style="margin-top:12px;">
-        <span class="seal-emoji">🦭</span>
-        <div>
-          <div class="seal-name">МИМИС ПОДСКАЗЫВАЕТ</div>
-          <div class="seal-text">После плохой задачи Ваня думает «что именно проверить?», «какой клиент?», «в какие сроки?» — и задаёт вопросы. После хорошей — просто берёт и делает!</div>
-        </div>
-      </div>
-    `
-  },
-  {
-    title: "Живые примеры из Мимис",
-    icon: "🎯",
-    content: `
-      <div class="section-header">
-        <div class="step-badge">3</div>
-        <div class="step-title">Три ситуации из жизни команды</div>
-      </div>
-      <div style="font-size:11px; font-weight:700; color:#E91E8C; letter-spacing:0.5px; margin-bottom:8px;">СИТУАЦИЯ 1 — ЗАДАЧА ДЛЯ ЮРИСТА</div>
-      <div class="example-card example-bad" style="margin-bottom:6px;">
-        <div class="example-label label-bad">❌ ПЛОХО: Согласуй договор.</div>
-      </div>
-      <div class="example-card example-good">
-        <div class="example-label label-good">✅ ХОРОШО</div>
-        <div class="example-text">Иван, нужно проверить договор поставки по ООО «Байкал Маркет». Клиент просит отсрочку 14 дней, первая поставка на 180 000 руб. Нужны замечания или согласование. Срок: пятница 17:00.</div>
-      </div>
-      <div class="section-divider"></div>
-      <div style="font-size:11px; font-weight:700; color:#E91E8C; letter-spacing:0.5px; margin-bottom:8px;">СИТУАЦИЯ 2 — ЗАДАЧА ДЛЯ РОПа</div>
-      <div class="example-card example-bad" style="margin-bottom:6px;">
-        <div class="example-label label-bad">❌ ПЛОХО: Нужно согласовать условия.</div>
-      </div>
-      <div class="example-card example-good">
-        <div class="example-label label-good">✅ ХОРОШО</div>
-        <div class="example-text">Прошу согласовать индивидуальные условия по ООО «Байкал Сувенир». Клиент: 10 магазинов, план закупок ~500 000 руб./мес., просит скидку 5%. Считаю согласование целесообразным — клиент перспективный. Ответ нужен до 12:00 завтра.</div>
-      </div>
-      <div class="section-divider"></div>
-      <div style="font-size:11px; font-weight:700; color:#E91E8C; letter-spacing:0.5px; margin-bottom:8px;">СИТУАЦИЯ 3 — ЗАДАЧА ДЛЯ ПРОИЗВОДСТВА</div>
-      <div class="example-card example-bad" style="margin-bottom:6px;">
-        <div class="example-label label-bad">❌ ПЛОХО: Можно сделать такую игрушку?</div>
-      </div>
-      <div class="example-card example-good">
-        <div class="example-label label-good">✅ ХОРОШО</div>
-        <div class="example-text">Евгений, нужна оценка возможности производства нерпы по индивидуальному заказу. Клиент запрашивает 500 штук, образец прилагаю, желаемый срок поставки — август. Прошу ответить: возможно ли производство, ориентировочные сроки и минимальный тираж. Срок ответа: до среды.</div>
-      </div>
-      <div style="background: #EBF5FB; border-radius:14px; padding:14px; margin-top:12px; text-align:center;">
-        <div style="font-size:13px; font-weight:800; color:#2E86C1;">Видишь разницу?</div>
-        <div style="font-size:13px; color:#5D6D7E; margin-top:4px;">Хорошая задача = человек берёт и делает.<br>Плохая задача = квест «угадай, что я имела в виду».</div>
-      </div>
-    `
-  }
+const TIPS=["Хорошая задача — коллега сразу берётся за работу!","Срок — это дата и время. Не «срочно», а «до пятницы 17:00»!","Главный вопрос: смог бы ТЫ выполнить эту задачу по своему тексту?","Вводные данные экономят команде по часу в день.","Ты справляешься! Каждый шаг делает тебя лучше 🐾"];
+let tipI=0;
+function toggleTip(){const t=document.getElementById('ftip');if(t.classList.contains('show')){t.classList.remove('show');return;}t.textContent=TIPS[tipI%TIPS.length];tipI++;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
+
+const LEARN=[
+{title:"Почему это важно?",icon:"💡",html:`
+<div class="sb"><span class="sb-emo">🦭</span><div><div class="sb-who">МИМИС ОБЪЯСНЯЕТ</div><div class="sb-txt">Когда задача непонятна — Иван, Снежана и Евгений не молчат. Они задают вопросы, откладывают задачи, или делают что-то не то. Одна плохая задача может стоить команде полдня!</div></div></div>
+<div class="card card-pink">
+  <div class="sh"><div class="shb shb-pink">!</div><div class="sh-title">Что происходит с плохой задачей?</div></div>
+  <ul class="cl">
+    <li><span>❓</span> Иван задаёт 5 уточняющих вопросов вместо работы</li>
+    <li><span>⏳</span> Задача откладывается или выполняется неверно</li>
+    <li><span>🔄</span> Снежана просит объяснить всё снова</li>
+    <li><span>😤</span> Евгений раздражён — ему нечего ответить без данных</li>
+  </ul>
+</div>
+<div style="background:linear-gradient(135deg,#FDEEF5,#EBF5FB);border-radius:16px;padding:16px;text-align:center;border:1.5px solid #F5B7D1;">
+  <div style="font-size:11px;font-weight:700;color:#E91E8C;letter-spacing:.5px;margin-bottom:7px;">ГЛАВНЫЙ ВОПРОС МИМИСА</div>
+  <div style="font-size:15px;font-weight:800;color:#1A5276;line-height:1.6;">«Если бы эту задачу прислали мне —<br>смог бы я начать работу прямо сейчас,<br>не задав ни одного вопроса?»</div>
+</div>`},
+{title:"5 элементов хорошей задачи",icon:"📋",html:`
+<div class="sh"><div class="shb shb-blue">5</div><div class="sh-title">Хорошая задача отвечает на 5 вопросов</div></div>
+<div class="card">
+  <div class="det-row"><span>✅ Что нужно сделать?</span><span class="tag tag-b">действие</span></div>
+  <div class="det-row"><span>✅ По кому / по чему?</span><span class="tag tag-p">объект</span></div>
+  <div class="det-row"><span>✅ Какие есть вводные?</span><span class="tag tag-b">данные</span></div>
+  <div class="det-row"><span>✅ Какой результат нужен?</span><span class="tag tag-g">итог</span></div>
+  <div class="det-row" style="border:none"><span>✅ Когда нужен ответ?</span><span class="tag tag-p">срок</span></div>
+</div>
+<div style="font-size:11px;font-weight:700;color:#E91E8C;letter-spacing:.5px;margin-bottom:8px;">ЗАДАЧА ДЛЯ ИВАНА (ЮРИСТ) — СРАВНИ</div>
+<div class="ex ex-bad"><div class="ex-lbl">❌ ТАК НЕ НАДО</div><p>Привет! Согласуй договор, пожалуйста.</p></div>
+<div class="ex ex-good"><div class="ex-lbl">✅ ВОТ ТАК ХОРОШО</div><p><strong>Привет, Иван!</strong><br>Нужно проверить договор поставки по клиенту ООО «Байкал Сувенир».<br><br><strong>Вводные:</strong> 5 магазинов, первая поставка 180 000 руб., клиент просит отсрочку 30 дней.<br><strong>Результат:</strong> согласование или список замечаний.<br><strong>Срок:</strong> до 16:00 пятницы.</p></div>
+<div class="sb" style="margin-top:12px;"><span class="sb-emo">👨‍⚖️</span><div><div class="sb-who">ИВАН ГОВОРИТ</div><div class="sb-txt">После хорошей задачи я сразу открываю договор и начинаю работать. После плохой — пишу вопросы и жду. Разница огромная!</div></div></div>`},
+{title:"Живые примеры из Мимис",icon:"🎯",html:`
+<div style="font-size:11px;font-weight:700;color:#E91E8C;letter-spacing:.5px;margin-bottom:7px;">СИТУАЦИЯ 1 — ДЛЯ ИВАНА (ЮРИСТ)</div>
+<div class="ex ex-bad" style="margin-bottom:5px;"><div class="ex-lbl">❌ Согласуй договор.</div></div>
+<div class="ex ex-good"><div class="ex-lbl">✅ ХОРОШО</div><p>Иван, нужно проверить договор поставки по ООО «Байкал Маркет». Клиент просит отсрочку 14 дней, первая поставка на 180 000 руб. Нужны замечания или согласование. Срок: пятница 17:00.</p></div>
+<div class="divider"></div>
+<div style="font-size:11px;font-weight:700;color:#E91E8C;letter-spacing:.5px;margin-bottom:7px;">СИТУАЦИЯ 2 — ДЛЯ СНЕЖАНЫ (РОП)</div>
+<div class="ex ex-bad" style="margin-bottom:5px;"><div class="ex-lbl">❌ Нужно согласовать условия.</div></div>
+<div class="ex ex-good"><div class="ex-lbl">✅ ХОРОШО</div><p>Снежана, прошу согласовать индивидуальные условия по ООО «Байкал Сувенир». Клиент: 10 магазинов, план ~500 000 руб./мес., просит скидку 5%. Считаю целесообразным — клиент перспективный. Ответ нужен до 12:00 завтра.</p></div>
+<div class="divider"></div>
+<div style="font-size:11px;font-weight:700;color:#E91E8C;letter-spacing:.5px;margin-bottom:7px;">СИТУАЦИЯ 3 — ДЛЯ ЕВГЕНИЯ (ДИРЕКТОР)</div>
+<div class="ex ex-bad" style="margin-bottom:5px;"><div class="ex-lbl">❌ Можно сделать такую игрушку?</div></div>
+<div class="ex ex-good"><div class="ex-lbl">✅ ХОРОШО</div><p>Евгений, нужна оценка возможности производства нерпы по индивидуальному заказу. Клиент запрашивает 500 штук, образец прилагаю, поставка — август. Прошу ответить: возможно ли производство, ориентировочные сроки и минимальный тираж. Срок ответа: до среды.</p></div>
+<div class="card card-green" style="margin-top:12px;text-align:center;">
+  <div style="font-size:14px;font-weight:800;color:#1A5276;">Чем понятнее задача —</div>
+  <div style="font-size:13px;color:#5D6D7E;margin-top:3px;">тем быстрее результат и меньше лишних вопросов!</div>
+</div>`},
+{title:"Чек-лист: сохрани себе!",icon:"📥",html:`
+<div class="sb"><span class="sb-emo">🦭</span><div><div class="sb-who">МИМИС ДАРИТ ПОДСКАЗКУ</div><div class="sb-txt">Сохрани этот чек-лист! Перед отправкой любой задачи пробегись по нему глазами — и коллеги скажут тебе спасибо 🐾</div></div></div>
+<div class="dl-section">
+  <div style="font-size:15px;font-weight:800;color:#1A5276;margin-bottom:4px;">📋 Памятка: 3 ситуации</div>
+  <div style="font-size:12px;color:#5D6D7E;margin-bottom:10px;">Нажми на картинку, чтобы скачать и распечатать</div>
+  <a href="__CHECKLIST__" download="mimis_checklist.jpg">
+    <img src="__CHECKLIST__" alt="Чек-лист Мимис"/>
+  </a>
+</div>
+<div class="card">
+  <div style="font-size:11px;font-weight:700;color:#5DADE2;letter-spacing:.5px;margin-bottom:10px;">ПРОСТАЯ ФОРМУЛА ПЕРЕД ОТПРАВКОЙ</div>
+  <ul class="cl">
+    <li><span class="tag tag-b">1</span> Что нужно сделать — конкретное действие</li>
+    <li><span class="tag tag-p">2</span> По кому / по чему — клиент или объект</li>
+    <li><span class="tag tag-b">3</span> Какие вводные — факты для решения</li>
+    <li><span class="tag tag-g">4</span> Какой результат ожидается</li>
+    <li><span class="tag tag-p">5</span> Конкретный срок — дата и время</li>
+  </ul>
+</div>`}
 ];
 
-const quizQuestions = [
-  {
-    type: "choice",
-    q: "Ты ставишь задачу юристу Ване. Какой вариант лучше?",
-    options: [
-      "Привет! Проверь договор, пожалуйста.",
-      "Иван, нужно проверить договор поставки по ООО «Байкал Сувенир». Клиент просит отсрочку 21 день. Нужны замечания или согласование. Срок: пятница 16:00.",
-      "Иван, договор нужно посмотреть по Байкалу, срочно!"
-    ],
-    correct: 1,
-    feedback: ["В задаче нет клиента, вводных, результата и чёткого срока — Ваня задаст минимум 4 вопроса.", "Отлично! Есть всё: действие, клиент, вводные (отсрочка), результат и точный срок.", "«Посмотреть» — не конкретное действие, «срочно» — не срок, нет вводных."]
-  },
-  {
-    type: "choice",
-    q: "Клиент просит скидку. Как правильно написать РОПу?",
-    options: [
-      "Нужно согласовать индивидуальные условия.",
-      "Привет, клиент хочет скидку, надо решить.",
-      "Прошу согласовать условия по ООО «Сибирский сувенир»: 8 магазинов, план ~300 000 руб./мес., просит скидку 5%. Ответ нужен до завтра 12:00."
-    ],
-    correct: 2,
-    feedback: ["Нет конкретики: какой клиент, какие условия, какой масштаб бизнеса?", "Слишком размыто — никакой конкретики и данных для принятия решения.", "Всё на месте: кто клиент, масштаб, запрос и чёткий дедлайн."]
-  },
-  {
-    type: "choice",
-    q: "Какой срок лучше всего указать в задаче?",
-    options: ["Срочно!", "Как можно быстрее.", "До 15:00 в пятницу 20 июня."],
-    correct: 2,
-    feedback: ["«Срочно» — у каждого своё понимание срочности. Это не срок, это ощущение.", "«Как можно быстрее» так же расплывчато, как «срочно».", "Конкретная дата и время — единственный настоящий срок."]
-  },
-  {
-    type: "choice",
-    q: "Ты получила задачу: «Посмотри, пожалуйста». Что здесь не так?",
-    options: ["Нет восклицательного знака.", "Непонятно что смотреть, зачем, и какой результат ожидается.", "Всё нормально, понятная задача."],
-    correct: 1,
-    feedback: ["Восклицательный знак не делает задачу понятнее 😄", "Именно! «Посмотри» — это не задача. Нет ни объекта, ни цели, ни результата.", "Если бы Мимис получил такую задачу — он бы очень удивился."]
-  },
-  {
-    type: "choice",
-    q: "Коллега прочитал твою задачу и задал 5 уточняющих вопросов. Что это значит?",
-    options: ["Коллега очень внимательный и педантичный.", "Задача поставлена неполно — не хватает важной информации.", "Всё отлично, так и должно быть."],
-    correct: 1,
-    feedback: ["Хорошая задача не требует вопросов — коллега просто берёт и делает.", "Точно! 5 вопросов = 5 недостающих элементов в задаче. Цель — 0 вопросов.", "Если возникают вопросы — задача не готова к отправке."]
-  },
-  {
-    type: "choice",
-    q: "Какой из этих пунктов НЕ является обязательной частью хорошей задачи?",
-    options: ["Смайлики и дружелюбный тон.", "Конкретный срок выполнения.", "Вводные данные по клиенту/ситуации."],
-    correct: 0,
-    feedback: ["Верно! Смайлики — приятное дополнение, но не обязательны. Важна суть, а не оформление.", "Срок — один из 5 ключевых элементов хорошей задачи.", "Вводные данные критически важны — без них невозможно принять правильное решение."]
-  },
-  {
-    type: "open",
-    q: "Задача для юриста Вани",
-    context: "Клиент: ООО «Байкал Маркет». Первая поставка на 180 000 руб. Клиент просит отсрочку 14 дней. Нужно проверить договор. Срок — пятница.",
-    hint: "Напиши задачу так, чтобы Ваня смог начать работу сразу, не задав ни одного вопроса",
-    criteria: ["Что сделать (проверить договор поставки)", "Указан клиент (ООО «Байкал Маркет»)", "Вводные: сумма 180 000 руб. и отсрочка 14 дней", "Ожидаемый результат (согласование или замечания)", "Срок (пятница + конкретное время)", "Можно начать работу без уточнений"]
-  },
-  {
-    type: "open",
-    q: "Задача для РОПа Снежаны",
-    context: "Клиент хочет скидку 5%. У клиента 12 магазинов. Планируемые закупки около 500 000 руб./месяц. Ответ нужен завтра до 12:00.",
-    hint: "Не забудь объяснить, почему считаешь согласование оправданным",
-    criteria: ["Что нужно сделать (согласовать условия/скидку)", "Указан клиент или контекст", "Вводные: 12 магазинов и объём 500 000 руб./мес.", "Указана просьба клиента (5% скидка)", "Срок (до 12:00 завтра)", "Можно принять решение без уточнений"]
-  },
-  {
-    type: "open",
-    q: "Задача для директора по производству Евгения",
-    context: "Клиент хочет заказать 700 мягких нерп. Поставка нужна в августе. Нужно понять: можем ли произвести, сроки и минимальный тираж. Ответ нужен до среды.",
-    hint: "Укажи все три вопроса, на которые ждёшь ответа",
-    criteria: ["Что нужно оценить (возможность производства)", "Конкретный товар и количество (нерпы, 700 шт.)", "Срок поставки (август)", "Три конкретных вопроса для ответа", "Срок ответа (до среды)", "Задача самодостаточна — Евгений не будет уточнять"]
-  },
-  {
-    type: "open",
-    q: "Задача для бухгалтерии",
-    context: "Клиент запросил акт сверки. Период: январь–июнь 2025 года. Документ нужен сегодня до 17:00.",
-    hint: "Укажи клиента (можешь придумать название), период и точный срок",
-    criteria: ["Что нужно сделать (подготовить акт сверки)", "Указан клиент", "Чётко указан период (январь–июнь 2025)", "Ожидаемый результат (готовый документ)", "Срок (сегодня до 17:00)", "Задача понятна без уточнений"]
-  }
+const QUIZ=[
+{type:"c",q:"Ты ставишь задачу Ивану. Какой вариант лучше?",opts:["Привет! Проверь договор, пожалуйста.","Иван, нужно проверить договор поставки по ООО «Байкал Сувенир». Клиент просит отсрочку 21 день. Нужны замечания или согласование. Срок: пятница 16:00.","Иван, договор посмотри по Байкалу, срочно!"],correct:1,fb:["Нет клиента, вводных, результата и чёткого срока — Иван задаст минимум 4 вопроса.","Отлично! Есть всё: действие, клиент, вводные, результат и точный срок.","«Посмотри» — не действие, «срочно» — не срок, вводных нет."]},
+{type:"c",q:"Клиент просит скидку. Как правильно написать Снежане?",opts:["Нужно согласовать индивидуальные условия.","Привет, клиент хочет скидку, надо решить.","Снежана, прошу согласовать условия по ООО «Сибирский сувенир»: 8 магазинов, план ~300 000 руб./мес., просит скидку 5%. Ответ нужен до завтра 12:00."],correct:2,fb:["Нет конкретики: какой клиент, какие условия, какой масштаб?","Слишком размыто — никакой конкретики для принятия решения.","Всё на месте: клиент, масштаб, запрос и чёткий дедлайн."]},
+{type:"c",q:"Какой срок правильно указать в задаче?",opts:["Срочно!","Как можно быстрее.","До 15:00 в пятницу 20 июня."],correct:2,fb:["«Срочно» — у каждого своё понимание. Это не срок, это ощущение.","«Как можно быстрее» так же расплывчато.","Конкретная дата и время — единственный настоящий срок."]},
+{type:"c",q:"Ты получила задачу: «Посмотри, пожалуйста». Что здесь не так?",opts:["Нет восклицательного знака.","Непонятно что смотреть, зачем, и какой результат ожидается.","Всё нормально, понятная задача."],correct:1,fb:["Восклицательный знак не делает задачу понятнее 😄","Именно! «Посмотри» — не задача. Нет ни объекта, ни цели, ни результата.","Если бы Мимис получил такую задачу — он бы очень удивился."]},
+{type:"c",q:"Евгений прочитал задачу и задал 5 уточняющих вопросов. Что это значит?",opts:["Евгений очень внимательный и педантичный.","Задача поставлена неполно — не хватает важной информации.","Всё отлично, так и должно быть."],correct:1,fb:["Хорошая задача не требует вопросов — Евгений просто берёт и делает.","Точно! 5 вопросов = 5 недостающих элементов. Цель — 0 вопросов.","Если возникают вопросы — задача не готова к отправке."]},
+{type:"c",q:"Какой пункт НЕ является обязательной частью хорошей задачи?",opts:["Смайлики и дружелюбный тон.","Конкретный срок выполнения.","Вводные данные по клиенту."],correct:0,fb:["Верно! Смайлики — приятно, но не обязательно. Важна суть.","Срок — один из 5 ключевых элементов.","Вводные критически важны — без них невозможно принять решение."]},
+{type:"o",q:"Задача для юриста Ивана",ctx:"Клиент: ООО «Байкал Маркет». Первая поставка на 180 000 руб. Клиент просит отсрочку 14 дней. Нужно проверить договор. Срок — пятница.",hint:"Напиши так, чтобы Иван смог начать работу сразу, не задав ни одного вопроса",crit:["Что сделать (проверить договор поставки)","Указан клиент (ООО «Байкал Маркет»)","Вводные: сумма 180 000 руб. и отсрочка 14 дней","Ожидаемый результат (согласование или замечания)","Срок (пятница + конкретное время)","Можно начать работу без уточнений"]},
+{type:"o",q:"Задача для РОПа Снежаны",ctx:"Клиент хочет скидку 5%. У клиента 12 магазинов. Планируемые закупки около 500 000 руб./месяц. Ответ нужен завтра до 12:00.",hint:"Не забудь объяснить, почему считаешь согласование оправданным",crit:["Что нужно сделать (согласовать условия / скидку)","Указан клиент или контекст","Вводные: 12 магазинов и объём 500 000 руб./мес.","Указана просьба клиента (5% скидка)","Срок (до 12:00 завтра)","Можно принять решение без уточнений"]},
+{type:"o",q:"Задача для директора по производству Евгения",ctx:"Клиент хочет заказать 700 мягких нерп. Поставка нужна в августе. Нужно понять: можем ли произвести, сроки и минимальный тираж. Ответ нужен до среды.",hint:"Укажи все три вопроса, на которые ждёшь ответа от Евгения",crit:["Что нужно оценить (возможность производства)","Конкретный товар и количество (нерпы, 700 шт.)","Срок поставки (август)","Три конкретных вопроса для ответа","Срок ответа (до среды)","Задача самодостаточна — Евгений не будет уточнять"]},
+{type:"o",q:"Задача для бухгалтерии",ctx:"Клиент запросил акт сверки. Период: январь–июнь 2025 года. Документ нужен сегодня до 17:00.",hint:"Укажи клиента (можешь придумать название), период и точный срок",crit:["Что нужно сделать (подготовить акт сверки)","Указан клиент","Чётко указан период (январь–июнь 2025)","Ожидаемый результат (готовый документ)","Срок (сегодня до 17:00)","Задача понятна без уточнений"]}
 ];
 
-let learnStep = 0;
-let quizStep = 0;
-let answers = {};
-let scores = {};
-let choiceAnswers = {};
+let ls=0,qs=0;
+const chA={},oA={},sc={},fb={},critSc={};
 
-function showLearn() {
-  document.getElementById('screen-welcome').classList.remove('active');
-  document.getElementById('screen-learn').classList.add('active');
-  learnStep = 0;
+function setScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function showLearn(){setScreen('s-learn');ls=0;renderLearn();}
+
+function renderLearn(){
+  const dots=document.getElementById('ldots');
+  dots.innerHTML=LEARN.map((b,i)=>`<div class="dot ${i===ls?'active':i<ls?'done':''}"></div>`).join('');
+  const b=LEARN[ls];
+  let html=b.html;
+  document.getElementById('lbody').innerHTML=`<div class="card" style="margin-bottom:14px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:13px;"><span style="font-size:26px;">${b.icon}</span><div style="font-size:17px;font-weight:800;color:#1A5276;">${b.title}</div><span style="margin-left:auto;font-size:12px;color:#5D6D7E;font-weight:600;">${ls+1}/${LEARN.length}</span></div>${html}</div>`;
+  document.getElementById('lback').style.display=ls===0?'none':'block';
+  document.getElementById('lnext').textContent=ls===LEARN.length-1?'Перейти к тесту 🎯':'Далее →';
+}
+function learnNav(d){
+  if(d===1&&ls===LEARN.length-1){setScreen('s-quiz');qs=0;renderQ();return;}
+  ls=Math.max(0,Math.min(LEARN.length-1,ls+d));
   renderLearn();
 }
 
-function renderLearn() {
-  const dots = document.getElementById('learn-dots');
-  dots.innerHTML = learnBlocks.map((b, i) =>
-    `<div class="dot ${i === learnStep ? 'active' : i < learnStep ? 'done' : ''}"></div>`
-  ).join('');
-
-  const block = learnBlocks[learnStep];
-  document.getElementById('learn-content').innerHTML = `
-    <div style="background:white; border-radius:20px; padding:20px; border:1.5px solid #D6EAF8; margin-bottom:16px;">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
-        <span style="font-size:28px;">${block.icon}</span>
-        <div style="font-size:17px; font-weight:800; color:#1A5276;">${block.title}</div>
-        <span style="margin-left:auto; font-size:12px; color:#5D6D7E; font-weight:600;">${learnStep+1} / ${learnBlocks.length}</span>
-      </div>
-      ${block.content}
-    </div>
-  `;
-
-  document.getElementById('learn-back').style.display = learnStep === 0 ? 'none' : 'block';
-  document.getElementById('learn-next').textContent = learnStep === learnBlocks.length - 1 ? 'Перейти к тесту 🎯' : 'Далее →';
-}
-
-function learnNav(dir) {
-  if (dir === 1 && learnStep === learnBlocks.length - 1) {
-    document.getElementById('screen-learn').classList.remove('active');
-    document.getElementById('screen-quiz').classList.add('active');
-    quizStep = 0;
-    renderQuiz();
-    return;
-  }
-  learnStep = Math.max(0, Math.min(learnBlocks.length - 1, learnStep + dir));
-  renderLearn();
-}
-
-function renderQuiz() {
-  const q = quizQuestions[quizStep];
-  const isChoice = q.type === 'choice';
-  const total = quizQuestions.length;
-  const progress = Math.round((quizStep / total) * 100);
-
-  let html = `
-    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
-    <div class="progress-label">Вопрос ${quizStep + 1} из ${total}</div>
-    <div class="question-card">
-      <div class="question-title">${isChoice ? '🎯 ВЫБЕРИ ПРАВИЛЬНЫЙ ОТВЕТ' : '✍️ ПРАКТИКА — НАПИШИ ЗАДАЧУ'}</div>
-      <div class="question-text">${q.q}</div>
-  `;
-
-  if (q.context) {
-    html += `<div class="question-context"><div class="context-title">📋 ИСХОДНЫЕ ДАННЫЕ:</div>${q.context}</div>`;
-  }
-  if (q.hint) {
-    html += `<div style="font-size:12px; color:#5DADE2; margin-bottom:12px; font-weight:600;">💡 ${q.hint}</div>`;
-  }
-
-  if (isChoice) {
-    const prev = choiceAnswers[quizStep];
-    html += q.options.map((opt, i) => {
-      let cls = 'btn-answer';
-      if (prev !== undefined) {
-        if (i === q.correct) cls += ' correct';
-        else if (i === prev && prev !== q.correct) cls += ' wrong';
+function renderQ(){
+  const q=QUIZ[qs],tot=QUIZ.length,pct=Math.round(qs/tot*100);
+  let html=`<div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div><div class="prog-lbl">Вопрос ${qs+1} из ${tot}</div><div class="qc">`;
+  if(q.type==='c'){
+    html+=`<div class="qt qt-ch">🎯 ВЫБЕРИ ПРАВИЛЬНЫЙ ОТВЕТ</div><div class="qtitle">${q.q}</div>`;
+    const prev=chA[qs];
+    html+=q.opts.map((o,i)=>{let cls='ans-btn';if(prev!==undefined){if(i===q.correct)cls+=' correct';else if(i===prev&&prev!==q.correct)cls+=' wrong';}return`<button class="${cls}" onclick="ansC(${i})" ${prev!==undefined?'disabled':''}>${o}</button>`;}).join('');
+    if(prev!==undefined){const ok=prev===q.correct;html+=`<div class="fb ${ok?'fb-good':'fb-bad'}">${ok?'🎉 ':'💭 '}${q.fb[prev]}</div>`;html+=`<button class="btn btn-blue" onclick="nextQ()" style="margin-top:12px;">${qs<tot-1?'Следующий вопрос →':'Завершить тест 🏁'}</button>`;}
+  } else {
+    html+=`<div class="qt qt-op">✍️ ПРАКТИКА — НАПИШИ ЗАДАЧУ</div><div class="qtitle">${q.q}</div>`;
+    html+=`<div class="qctx"><div class="qctx-lbl">📋 ИСХОДНЫЕ ДАННЫЕ:</div>${q.ctx}</div>`;
+    html+=`<div class="qhint">💡 ${q.hint}</div>`;
+    const prev=oA[qs];
+    html+=`<textarea class="af" id="oa" placeholder="Напиши задачу здесь..." ${prev!==undefined?'disabled':''}>${prev||''}</textarea>`;
+    if(prev!==undefined&&sc[qs]!==undefined){
+      const s=sc[qs],f=fb[qs]||'';
+      const cls=s>=5?'fb-good':s>=3?'fb-ok':'fb-bad';
+      html+=`<div class="fb ${cls}"><strong>Оценка: ${s} из 6 баллов</strong><br>${f}</div>`;
+      if(critSc[qs]&&critSc[qs].length){
+        html+=`<div class="crit-card"><div class="crit-lbl">ДЕТАЛЬНАЯ ОЦЕНКА:</div>`;
+        q.crit.forEach((c,i)=>{const got=critSc[qs][i]||0;html+=`<div class="cr ${got?'ok':'no'}"><span class="cr-n">${got?'✓':'✗'}</span>${c}</div>`;});
+        html+=`</div>`;
       }
-      return `<button class="${cls}" onclick="answerChoice(${i})" ${prev !== undefined ? 'disabled' : ''}>${opt}</button>`;
-    }).join('');
-
-    if (prev !== undefined) {
-      const ok = prev === q.correct;
-      html += `<div class="feedback-box ${ok ? 'feedback-good' : 'feedback-bad'}">${ok ? '🎉 ' : '💭 '}${q.feedback[prev]}</div>`;
-      html += `<button class="btn-primary" onclick="nextQuiz()" style="margin-top:16px;">${quizStep < total-1 ? 'Следующий вопрос →' : 'Завершить тест 🏁'}</button>`;
-    }
-  } else {
-    const prev = answers[quizStep];
-    html += `<textarea class="answer-field" id="open-answer" placeholder="Напиши задачу здесь..." ${prev !== undefined ? 'disabled' : ''}>${prev || ''}</textarea>`;
-
-    if (prev !== undefined && scores[quizStep] !== undefined) {
-      const sc = scores[quizStep];
-      const feedbackText = window.feedbackTexts && window.feedbackTexts[quizStep] ? window.feedbackTexts[quizStep] : '';
-      html += `<div class="feedback-box ${sc >= 5 ? 'feedback-good' : sc >= 3 ? 'feedback-loading' : 'feedback-bad'}">
-        <strong>Оценка: ${sc} из 6 баллов</strong><br>${feedbackText}
-      </div>`;
-      html += `<button class="btn-primary" onclick="nextQuiz()" style="margin-top:16px;">${quizStep < total-1 ? 'Следующий вопрос →' : 'Посмотреть результат 🏆'}</button>`;
-    } else if (prev === undefined) {
-      html += `<button class="btn-primary" id="submit-open" onclick="submitOpen()" style="margin-top:12px;">Отправить на проверку ✨</button>`;
+      html+=`<button class="btn btn-blue" onclick="nextQ()" style="margin-top:12px;">${qs<tot-1?'Следующий вопрос →':'Посмотреть результат 🏆'}</button>`;
+    } else if(prev===undefined){
+      html+=`<button class="btn btn-pink" onclick="submitO()" style="margin-top:11px;">Отправить на проверку ✨</button>`;
     } else {
-      html += `<div class="feedback-box feedback-loading">Проверяю ответ<span class="loading-dots"><span></span><span></span><span></span></span></div>`;
+      html+=`<div class="fb fb-load">Проверяю ответ<span class="ldots"><span></span><span></span><span></span></span></div>`;
     }
   }
-
-  html += `</div>`;
-
-  if (!isChoice && q.criteria) {
-    html += `<div style="background:white; border-radius:14px; padding:14px; border:1.5px solid #D6EAF8; margin-top:12px;">
-      <div style="font-size:11px; font-weight:700; color:#5DADE2; letter-spacing:0.5px; margin-bottom:10px;">ЧТО ПРОВЕРЯЕТСЯ (6 БАЛЛОВ)</div>
-      ${q.criteria.map((c, i) => `<div style="font-size:13px; color:#2C3E50; padding:5px 0; border-bottom: 1px solid #EBF5FB; display:flex; align-items:center; gap:8px;"><span style="color:#AED6F1; font-weight:700; font-size:11px;">${i+1}</span> ${c}</div>`).join('')}
-    </div>`;
+  html+=`</div>`;
+  if(q.type==='o'&&oA[qs]===undefined){
+    html+=`<details><summary>📋 Критерии оценки (для самопроверки)</summary><div class="crit-card" style="border-radius:0 0 12px 12px;margin-top:0;border-top:none;">${q.crit.map((c,i)=>`<div class="cr"><span class="cr-n" style="color:#AED6F1;">${i+1}</span>${c}</div>`).join('')}</div></details>`;
   }
-
-  document.getElementById('quiz-content').innerHTML = html;
+  document.getElementById('qbody').innerHTML=html;
 }
 
-function answerChoice(i) {
-  choiceAnswers[quizStep] = i;
-  const q = quizQuestions[quizStep];
-  scores[quizStep] = i === q.correct ? 1 : 0;
-  renderQuiz();
-}
+function ansC(i){const q=QUIZ[qs];chA[qs]=i;sc[qs]=i===q.correct?1:0;renderQ();}
 
-async function submitOpen() {
-  const val = document.getElementById('open-answer').value.trim();
-  if (!val || val.length < 20) {
-    alert('Напиши задачу подробнее — хотя бы пару предложений!');
-    return;
+async function submitO(){
+  const val=document.getElementById('oa').value.trim();
+  if(!val||val.length<5){alert('Напиши задачу! Хотя бы несколько слов.');return;}
+  oA[qs]=val;renderQ();
+  const q=QUIZ[qs];
+  const prompt=`Ты строгий и справедливый тренер по деловой коммуникации в компании Мимис (производство мягких игрушек).
+
+Оцени задачу, написанную сотрудником.
+
+ЗАДАНИЕ: ${q.q}
+ИСХОДНЫЕ ДАННЫЕ: ${q.ctx}
+ОТВЕТ СОТРУДНИКА: "${val}"
+
+КРИТЕРИИ (каждый = 1 балл, максимум 6):
+${q.crit.map((c,i)=>`${i+1}. ${c}`).join('\n')}
+
+ПРАВИЛА ОЦЕНКИ (СТРОГО СОБЛЮДАЙ):
+- Если ответ — бессмысленный набор букв, случайные символы или текст явно не по теме (например "привет как дела" вместо задачи) — ОБЯЗАТЕЛЬНО ставь score: 0 и criteria_scores: [0,0,0,0,0,0]. Это НЕ задача.
+- Если написана задача, но в ней лишь 1-2 элемента (например только клиент и срок без действия и вводных) — 1-2 балла
+- Если задача есть, но не хватает конкретики или деталей — 3-4 балла  
+- Если задача полная, понятная, можно работать сразу — 5-6 баллов
+- 6-й балл ("можно начать без уточнений") ставь ТОЛЬКО если выполнены все остальные 5 критериев
+
+СТИЛЬ ОБРАТНОЙ СВЯЗИ:
+- 0-1 балл: мягко, но прямо скажи что написано непонятно. Напомни главный вопрос Мимиса: "Если бы эта задача пришла тебе — ты смог бы её выполнить?"
+- 2-3 балла: "Неплохо начало, но не хватает [конкретно что]"  
+- 4 балла: "Почти отлично! Добавь только [конкретно что]"
+- 5-6 баллов: искренне похвали, конкретно что хорошо
+
+Отвечай ТОЛЬКО JSON без markdown и пояснений:
+{"score":[0-6],"criteria_scores":[6 значений 0 или 1],"feedback":"[2-3 предложения на русском, дружелюбно и конкретно]"}`;
+
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:prompt}]})});
+    const d=await r.json();
+    const txt=d.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const p=JSON.parse(txt);
+    sc[qs]=Math.max(0,Math.min(6,p.score));
+    fb[qs]=p.feedback;
+    critSc[qs]=p.criteria_scores||[];
+  }catch(e){
+    sc[qs]=0;fb[qs]="Не удалось проверить автоматически. Попробуй перезагрузить страницу.";critSc[qs]=[0,0,0,0,0,0];
   }
-  answers[quizStep] = val;
-  renderQuiz();
-
-  const q = quizQuestions[quizStep];
-  const criteria = q.criteria.join('\n');
-  const prompt = `Ты опытный тренер по деловой коммуникации в компании Мимис (производство мягких игрушек).
-
-Сотрудник написал рабочую задачу коллеге. Оцени её по 6 критериям.
-
-ЗАДАНИЕ ДЛЯ СОТРУДНИКА: ${q.q}
-ИСХОДНЫЕ ДАННЫЕ: ${q.context}
-
-ОТВЕТ СОТРУДНИКА:
-"${val}"
-
-КРИТЕРИИ ОЦЕНКИ (каждый = 1 балл):
-${criteria}
-
-Дай оценку в формате JSON:
-{
-  "score": [число от 0 до 6],
-  "feedback": "[2-3 предложения на русском: что хорошо, что можно улучшить, тон дружелюбный и конкретный]",
-  "passed": [true если score >= 4]
+  renderQ();
 }
 
-Отвечай ТОЛЬКО JSON, без markdown и пояснений.`;
+function nextQ(){qs++;if(qs>=QUIZ.length){showResult();return;}renderQ();}
 
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 400,
-        messages: [{ role: "user", content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content.map(c => c.text || '').join('');
-    const clean = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-    scores[quizStep] = parsed.score;
-    if (!window.feedbackTexts) window.feedbackTexts = {};
-    window.feedbackTexts[quizStep] = parsed.feedback;
-  } catch(e) {
-    scores[quizStep] = 3;
-    if (!window.feedbackTexts) window.feedbackTexts = {};
-    window.feedbackTexts[quizStep] = "Ответ принят! Продолжай в том же духе — главное, что практика есть.";
+function buildSummary(chSc,opSc,total,maxT){
+  let lines=[`ИТОГО: ${total} / ${maxT} баллов`,`Тест на понимание: ${chSc} / 6`,`Практика: ${opSc} / 24`,'','=== ТЕСТОВЫЕ ВОПРОСЫ ==='];
+  QUIZ.slice(0,6).forEach((q,i)=>{const ch=chA[i];const ok=ch===q.correct;lines.push(`В${i+1}: ${q.q}`);lines.push(`  Ответ: ${ch!==undefined?q.opts[ch]:'(нет ответа)'} [${ok?'ВЕРНО':'НЕВЕРНО'}]`);});
+  lines.push('','=== ПРАКТИЧЕСКИЕ ЗАДАНИЯ ===');
+  QUIZ.slice(6).forEach((q,i)=>{const idx=i+6;const ans=oA[idx]||'(не заполнено)';const s=sc[idx]||0;const f=fb[idx]||'';lines.push(`П${i+1}: ${q.q}`);lines.push(`  Ответ: ${ans}`);lines.push(`  Оценка: ${s}/6 — ${f}`);if(critSc[idx]){q.crit.forEach((c,j)=>{lines.push(`    ${critSc[idx][j]?'✓':'✗'} ${c}`);});}lines.push('');});
+  return lines.join('\n');
+}
+
+async function showResult(){
+  setScreen('s-result');
+  const chSc=Object.entries(sc).filter(([k])=>parseInt(k)<6).reduce((a,[,v])=>a+(v||0),0);
+  const opSc=Object.entries(sc).filter(([k])=>parseInt(k)>=6).reduce((a,[,v])=>a+(v||0),0);
+  const total=chSc+opSc,maxT=6+4*6;
+  let rImg,rTitle,rDesc,sealMsg;
+  if(total>=25){rImg='__GOOD__';rTitle='Мастер понятных задач!';rDesc='Иван, Снежана и Евгений читают твои задачи и сразу берутся за работу. Никаких лишних вопросов!';sealMsg='Вся команда Мимис аплодирует! Вот это профессионализм! 🎉';}
+  else if(total>=18){rImg='__GOOD__';rTitle='Отличная работа!';rDesc='Ты хорошо понимаешь структуру задачи. Ещё немного практики — и будешь ставить задачи как профессионал!';sealMsg='Молодец! Ты на верном пути — практикуйся каждый день! 💪';}
+  else if(total>=12){rImg='__MID__';rTitle='Ты на верном пути!';rDesc='Основы есть, но иногда в задачах ещё бывают белые пятна. Перечитай памятку и попрактикуйся ещё немного.';sealMsg='Не сдавайся! Каждый раз лучше и лучше 🐾';}
+  else{rImg='__MID__';rTitle='Нужно повторить материал';rDesc='Не страшно! Вернись к теории, перечитай примеры и попробуй снова. С каждым разом будет лучше!';sealMsg='Я верю в тебя! Попробуй ещё раз после изучения материала 🦭';}
+
+  const summary=buildSummary(chSc,opSc,total,maxT);
+  sendEmail(total,maxT,rTitle,summary);
+
+  const html=`<div style="text-align:center;padding:16px 0 8px;"><div style="font-size:11px;font-weight:700;color:#5DADE2;letter-spacing:.5px;margin-bottom:5px;">РЕЗУЛЬТАТ ТЕСТА</div><div class="score-big">${total}</div><div class="score-of">из ${maxT} баллов</div></div>
+  <img src="${rImg}" alt="Результат" class="score-img"/>
+  <div class="card" style="text-align:center;"><div style="font-size:20px;font-weight:900;color:#1A5276;margin-bottom:7px;">${rTitle}</div><div style="font-size:14px;color:#5D6D7E;line-height:1.7;">${rDesc}</div></div>
+  <div class="sb"><span class="sb-emo">🦭</span><div><div class="sb-who">КОМАНДА МИМИС</div><div class="sb-txt">${sealMsg}</div></div></div>
+  <div class="card"><div style="font-size:11px;font-weight:700;color:#5DADE2;letter-spacing:.5px;margin-bottom:11px;">ДЕТАЛИЗАЦИЯ</div><div class="det-row"><span>Тест на понимание (6 вопросов)</span><span class="det-sc">${chSc} / 6</span></div><div class="det-row" style="border:none"><span>Практические задания (4 задачи)</span><span class="det-sc">${opSc} / 24</span></div></div>
+  <div style="background:#FDEEF5;border-radius:12px;padding:11px 13px;font-size:12px;color:#7D3C98;border:1.5px solid #F5B7D1;margin-bottom:14px;">📧 Результаты отправлены руководителю на worktogo25@gmail.com</div>
+  <div class="btn-row"><button class="btn btn-outline" onclick="restartAll()">↩ Пройти снова</button><button class="btn btn-blue" onclick="backToLearn()">📖 К теории</button></div>`;
+  document.getElementById('rbody').innerHTML=html;
+}
+
+async function sendEmail(total,maxT,title,summary){
+  const subject=`Мимис: результаты теста — ${total}/${maxT} баллов (${title})`;
+  const body=`Сотрудник прошёл обучение "Как ставить задачи".\n\n${summary}`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,messages:[{role:"user",content:`Сформируй ссылку mailto для отправки email.
+To: worktogo25@gmail.com
+Subject: ${subject}
+Body (первые 500 символов): ${body.substring(0,500)}
+
+Ответь ТОЛЬКО строкой: mailto:worktogo25@gmail.com?subject=ENCODED_SUBJECT&body=ENCODED_BODY
+Используй encodeURIComponent для кодирования.`}]})});
+    const d=await r.json();
+    const link=d.content.map(c=>c.text||'').join('').trim();
+    const a=document.createElement('a');
+    a.href=`mailto:worktogo25@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body.substring(0,2000))}`;
+    a.style.display='none';document.body.appendChild(a);
+  }catch(e){
+    const a=document.createElement('a');
+    a.href=`mailto:worktogo25@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(summary.substring(0,2000))}`;
+    a.style.display='none';document.body.appendChild(a);
   }
-  renderQuiz();
 }
 
-function nextQuiz() {
-  quizStep++;
-  if (quizStep >= quizQuestions.length) {
-    showResult();
-    return;
-  }
-  renderQuiz();
-}
-
-function showResult() {
-  document.getElementById('screen-quiz').classList.remove('active');
-  document.getElementById('screen-result').classList.add('active');
-
-  const choiceScore = Object.entries(scores).filter(([k]) => k < 6).reduce((a,[,v]) => a + (v||0), 0);
-  const openScore = Object.entries(scores).filter(([k]) => k >= 6).reduce((a,[,v]) => a + (v||0), 0);
-  const totalScore = choiceScore + openScore;
-  const maxScore = 6 + 4*6;
-
-  let seal = '🦭', title = '', desc = '';
-  if (totalScore >= 25) {
-    seal = '🏆'; title = 'Мастер понятных задач!';
-    desc = 'Коллеги читают твои задачи и сразу берутся за работу. Никаких лишних вопросов и потерянного времени!';
-  } else if (totalScore >= 18) {
-    seal = '⭐'; title = 'Хорошая работа!';
-    desc = 'Ты хорошо понимаешь структуру задачи. Ещё немного практики — и будешь ставить задачи как профессионал!';
-  } else if (totalScore >= 12) {
-    seal = '📚'; title = 'Есть куда расти!';
-    desc = 'Основы есть, но иногда в задачах ещё бывают «белые пятна». Перечитай памятку и попрактикуйся ещё немного.';
-  } else {
-    seal = '🧸'; title = 'Нужно повторить материал';
-    desc = 'Не страшно! Вернись к теории, перечитай примеры и попробуй снова. С каждым разом будет лучше!';
-  }
-
-  let html = `
-    <div class="score-display">
-      <div style="font-size:12px; font-weight:700; color:#5DADE2; letter-spacing:0.5px; margin-bottom:8px;">РЕЗУЛЬТАТ ТЕСТА</div>
-      <div class="score-big">${totalScore}</div>
-      <div class="score-max">из ${maxScore} баллов</div>
-      <div class="score-seal">${seal}</div>
-      <div class="score-title">${title}</div>
-      <div class="score-desc">${desc}</div>
-    </div>
-    <div style="background:white; border-radius:16px; padding:18px; border:1.5px solid #D6EAF8; margin-bottom:16px;">
-      <div style="font-size:11px; font-weight:700; color:#5DADE2; letter-spacing:0.5px; margin-bottom:12px;">ДЕТАЛИЗАЦИЯ</div>
-      <div class="criteria-row"><span class="criteria-name">Тест на понимание (6 вопросов)</span><span class="criteria-score">${choiceScore} / 6</span></div>
-      <div class="criteria-row" style="border:none"><span class="criteria-name">Практические задания (4 задачи)</span><span class="criteria-score">${openScore} / 24</span></div>
-    </div>
-    <div class="seal-bubble">
-      <span class="seal-emoji">🦭</span>
-      <div>
-        <div class="seal-name">МИМИС ГОВОРИТ</div>
-        <div class="seal-text">${totalScore >= 25 ? 'Вот это да! Теперь коллеги скажут тебе спасибо! 🎉' : totalScore >= 18 ? 'Молодец! Ты на верном пути — практикуйся каждый день! 💪' : 'Не сдавайся! Хорошие навыки приходят с практикой. Перечитай примеры! 🐾'}</div>
-      </div>
-    </div>
-    <div style="display:flex; gap:10px; margin-top:4px;">
-      <button class="btn-secondary" onclick="restartAll()" style="flex:1;">↩ Пройти снова</button>
-      <button class="btn-primary" style="flex:1; margin-top:0;" onclick="alert('Результат: ${totalScore}/${maxScore} баллов. ${title}')">📋 Скопировать итог</button>
-    </div>
-  `;
-
-  document.getElementById('result-content').innerHTML = html;
-}
-
-function restartAll() {
-  answers = {}; scores = {}; choiceAnswers = {};
-  window.feedbackTexts = {};
-  quizStep = 0; learnStep = 0;
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-welcome').classList.add('active');
-}
+function restartAll(){Object.keys(chA).forEach(k=>delete chA[k]);Object.keys(oA).forEach(k=>delete oA[k]);Object.keys(sc).forEach(k=>delete sc[k]);Object.keys(fb).forEach(k=>delete fb[k]);Object.keys(critSc).forEach(k=>delete critSc[k]);qs=0;ls=0;setScreen('s-welcome');}
+function backToLearn(){ls=0;setScreen('s-learn');renderLearn();}
 </script>
+</body>
+</html>
